@@ -373,7 +373,7 @@ class ModuleEmail {
 				if ($result == true) {
 					$this->db()->update($this->table->receiver,array('status'=>'SUCCESS'))->where('idx',$receiverIdx)->execute();
 				} else {
-					$this->db()->update($this->table->receiver,array('status'=>'FAIL','result'=>$result))->where('idx',$receiverIdx)->execute();
+					$this->db()->update($this->table->receiver,array('status'=>'FAIL','message'=>$result))->where('idx',$receiverIdx)->execute();
 				}
 			}
 		} else {
