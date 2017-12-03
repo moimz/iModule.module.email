@@ -58,7 +58,7 @@ class ModuleEmail {
 	private $bcc = array();
 	private $subject = null;
 	private $content = null;
-	private $templet = null;
+	private $templet = 'default';
 	
 	/**
 	 * class 선언
@@ -82,6 +82,16 @@ class ModuleEmail {
 		$this->table = new stdClass();
 		$this->table->send = 'email_send_table';
 		$this->table->receiver = 'email_receiver_table';
+	}
+	
+	/**
+	 * 모듈 코어 클래스를 반환한다.
+	 * 현재 모듈의 각종 설정값이나 모듈의 package.json 설정값을 모듈 코어 클래스를 통해 확인할 수 있다.
+	 *
+	 * @return Module $Module
+	 */
+	function getModule() {
+		return $this->Module;
 	}
 	
 	/**
@@ -499,23 +509,13 @@ class ModuleEmail {
 		if ($this->templet == null) return '<div>'.$this->content.'</div>';
 		
 		$templet = file_get_contents($this->getModule()->getPath().'/templets/'.$this->templet.'/index.html');
-		$templet = str_replace('{$iModuleDir}',$this->IM->getHost(true),$templet);
+		$templet = str_replace('{DIR}',$this->IM->getHost(true),$templet);
 		
-		$site = $this->IM->db()->select($this->IM->getTable('site'))->where('domain',$this->domain == null ? $this->IM->domain : $this->domain)->where('language',$this->language == null ? $this->IM->language : $this->language)->getOne();
+		$templet = str_replace('{SITETITLE}',$this->IM->getSiteTitle(),$templet);
+		$templet = str_replace('{SITELOGO}',$this->IM->getSiteLogo('default',true) != null ? $this->IM->getSiteLogo('default',true) : $this->IM->getHost(true).'/images/logo/default.png',$templet);
 		
-		if ($site != null) {
-			$site->logo = json_decode($site->logo);
-			$site->logo = isset($site->logo->default) == true ? '<img src="'.$this->IM->getHost(true,$this->domain).'/attachment/view/'.$site->logo->default.'/logo.png" style="max-width:200px;" alt="'.$site->title.'">' : $site->title;
-			$site->emblem = $site->emblem == 0 ? null : $this->IM->getHost(true,$this->domain).'/attachment/view/'.$site->emblem.'/emblem.png';
-			$site->favicon = $site->favicon == 0 ? null : $this->IM->getHost(true,$this->domain).'/attachment/view/'.$site->favicon.'/favicon.ico';
-			$site->image = $site->image == 0 ? null : $this->IM->getHost(true,$this->domain).'/attachment/view/'.$site->image.'/preview.jpg';
-			$site->description = $site->description ? $site->description : null;
-			
-			$templet = str_replace('{$siteLogo}',$site->logo,$templet);
-		}
-		
-		$templet = str_replace('{$subject}',$this->subject,$templet);
-		$templet = str_replace('{$content}',$this->content,$templet);
+		$templet = str_replace('{SUBJECT}',$this->subject,$templet);
+		$templet = str_replace('{CONTENT}',$this->content,$templet);
 		
 		return $templet;
 	}
