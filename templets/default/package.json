@@ -1,0 +1,21 @@
+{
+	"title":{
+		"ko":"이메일 기본 템플릿"
+	},
+	"version":"1.0.0",
+	"author":{
+		"name":"Arzz",
+		"email":"arzz@arzz.com"
+	},
+	"homepage":"https://www.imodule.kr",
+	"language":"ko",
+	"configs":{
+		"footer":{
+			"title":{
+				"ko":"본문하단메세지"
+			},
+			"type":"textarea",
+			"default":"본 메일은 발신전용 입니다."
+		}
+	}
+}
