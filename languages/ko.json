@@ -5,5 +5,25 @@
 		"receiver":"받는 사람 메일주소가 잘못되었습니다.",
 		"subject":"메일제목을 입력되지 않았습니다.",
 		"content":"메일본문이 입력되지 않았습니다."
+	},
+	"admin":{
+		"configs":{
+			"form":{
+				"default_setting":"기본설정",
+				"templet":"메일본문 템플릿",
+				"default_email":"기본 발송주소",
+				"default_name":"기본 발송자명",
+				"server_setting":"메일서버설정",
+				"use_sendmail":"기본서버사용",
+				"use_sendmail_help":"아이모듈이 설치된 서버의 기본 메일서버(SENDMAIL) 사용",
+				"smtp_server":"SMTP 주소",
+				"smtp_port":"포트",
+				"smtp_type":"접속방식",
+				"smtp_server_help":"외부 SMTP 서버를 사용할 경우 해당 서버의 정보를 입력하여 주십시오.",
+				"smtp_id":"SMTP 아이디",
+				"smtp_password":"패스워드",
+				"smtp_id_help":"외부 SMTP 서버에 인증이 필요할 경우 SMTP 서버 인증정보를 입력하여 주십시오."
+			}
+		}
 	}
 }

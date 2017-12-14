@@ -1,6 +1,6 @@
 <?php
 /**
- * 이 파일은 iModule 이메일모듈 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 이메일모듈의 일부입니다. (https://www.imodule.kr)
  *
  * 이메일 발송/전송기록과 관련된 모든 기능을 제어한다.
  *
@@ -58,7 +58,7 @@ class ModuleEmail {
 	private $bcc = array();
 	private $subject = null;
 	private $content = null;
-	private $templet = 'default';
+	private $templet = '#';
 	
 	/**
 	 * class 선언
@@ -328,6 +328,37 @@ class ModuleEmail {
 		if ($isRawData === true) return $error;
 		else return $this->IM->getErrorText($error);
 	}
+	
+	/**
+	 * 템플릿 정보를 가져온다.
+	 *
+	 * @param string $templet 템플릿명
+	 * @return string $package 템플릿 정보
+	 */
+	function getTemplet($templet=null) {
+		$templet = $templet == null ? $this->templet : $templet;
+		
+		/**
+		 * 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정일 경우
+		 */
+		if (is_object($templet) == true) {
+			$templet_configs = $templet !== null && isset($templet->templet_configs) == true ? $templet->templet_configs : null;
+			$templet = $templet !== null && isset($templet->templet) == true ? $templet->templet : '#';
+		} else {
+			$templet_configs = null;
+		}
+		
+		/**
+		 * 템플릿명이 # 이면 모듈 기본설정에 설정된 템플릿을 사용한다.
+		 */
+		if ($templet == '#') {
+			$templet = $this->getModule()->getConfig('templet');
+			$templet_configs = $this->getModule()->getConfig('templet_configs');
+		}
+		
+		return $this->getModule()->getTemplet($templet,$templet_configs);
+	}
+	
 	/*
 	public $table = array();
 
@@ -351,27 +382,27 @@ class ModuleEmail {
 
 		parent::__construct('email');
 
-		$phpMailer = new PHPMailer();
-		$phpMailer->PluginDir = $this->modulePath.'/class/';
+		$PHPMailer = new PHPMailer();
+		$PHPMailer->PluginDir = $this->modulePath.'/class/';
 
 		if ($isSMTP == true && $this->module['smtp_server']) {
-			$phpMailer->IsSMTP();
-			$phpMailer->SMTPSecure = $this->module['smtp_secure'];
-			$phpMailer->Host = $this->module['smtp_server'];
-			$phpMailer->Port = $this->module['smtp_port'];
+			$PHPMailer->IsSMTP();
+			$PHPMailer->SMTPSecure = $this->module['smtp_secure'];
+			$PHPMailer->Host = $this->module['smtp_server'];
+			$PHPMailer->Port = $this->module['smtp_port'];
 
 			if ($this->module['smtp_user'] && $this->module['smtp_password']) {
-				$phpMailer->SMTPAuth = true;
-				$phpMailer->Username = $this->module['smtp_user'];
-				$phpMailer->Password = $this->module['smtp_password'];
+				$PHPMailer->SMTPAuth = true;
+				$PHPMailer->Username = $this->module['smtp_user'];
+				$PHPMailer->Password = $this->module['smtp_password'];
 			}
 		}
 
-		$phpMailer->IsHTML(true);
-		$phpMailer->Encoding = 'base64';
-		$phpMailer->CharSet = 'UTF-8';
+		$PHPMailer->IsHTML(true);
+		$PHPMailer->Encoding = 'base64';
+		$PHPMailer->CharSet = 'UTF-8';
 
-		$phpMailer->SetFrom($this->module['email'], '=?UTF-8?b?'.base64_encode($this->module['name']).'?=');
+		$PHPMailer->SetFrom($this->module['email'], '=?UTF-8?b?'.base64_encode($this->module['name']).'?=');
 		$this->from = array($this->module['name'],$this->module['email']);
 		
 		$this->userfile = '/email';
@@ -404,7 +435,7 @@ class ModuleEmail {
 		$this->cc = array();
 		$this->subject = null;
 		$this->content = null;
-		$this->templet = null;
+		$this->templet = '#';
 		$this->domain = null;
 		$this->language = null;
 	}
@@ -427,14 +458,14 @@ class ModuleEmail {
 		$this->from = array($email,$name);
 		/*
 		if ($email != null && $name != null && $email) {
-			$phpMailer->SetFrom($email, '=?UTF-8?b?'.base64_encode($name).'?=');
+			$PHPMailer->SetFrom($email, '=?UTF-8?b?'.base64_encode($name).'?=');
 			if ($name) $this->from = array($name,$email);
 			else $this->from = array('',$email);
 		} elseif ($email != null && $email) {
-			$phpMailer->SetFrom($email, '=?UTF-8?b?'.base64_encode($this->module['name']).'?=');
+			$PHPMailer->SetFrom($email, '=?UTF-8?b?'.base64_encode($this->module['name']).'?=');
 			$this->from = array($this->module['name'],$email);
 		} elseif ($name != null) {
-			$phpMailer->SetFrom($this->module['email'], '=?UTF-8?b?'.base64_encode($name).'?=');
+			$PHPMailer->SetFrom($this->module['email'], '=?UTF-8?b?'.base64_encode($name).'?=');
 			if ($name) $this->from = array($name,$this->module['email']);
 			else $this->from = array('',$this->module['email']);
 		}
@@ -468,10 +499,10 @@ class ModuleEmail {
 		$this->to[] = array($email,$name);
 		/*
 		if ($name) {
-			$phpMailer->AddAddress($email, '=?UTF-8?b?'.base64_encode($name).'?=');
+			$PHPMailer->AddAddress($email, '=?UTF-8?b?'.base64_encode($name).'?=');
 			$this->to = array($name,$email);
 		} else {
-			$phpMailer->AddAddress($email, '=?UTF-8?b?'.base64_encode($name).'?=');
+			$PHPMailer->AddAddress($email, '=?UTF-8?b?'.base64_encode($name).'?=');
 			$this->to = array('',$email);
 		}
 		*/
@@ -488,7 +519,7 @@ class ModuleEmail {
 		if (file_exists($filepath) == false) $filepath = $_ENV['path'].$filepath;
 
 		if (file_exists($filepath) == true && filesize($filepath) < 10*1024*1024) {
-			$phpMailer->AddAttachment($filepath,$filename);
+			$PHPMailer->AddAttachment($filepath,$filename);
 		}
 	}
 */
@@ -506,6 +537,11 @@ class ModuleEmail {
 	}
 
 	function makeTemplet() {
+		$subject = $this->subject;
+		$content = $this->content;
+		
+		return $this->getTemplet()->getContext('index',get_defined_vars());
+		/*
 		if ($this->templet == null) return '<div>'.$this->content.'</div>';
 		
 		$templet = file_get_contents($this->getModule()->getPath().'/templets/'.$this->templet.'/index.html');
@@ -518,8 +554,9 @@ class ModuleEmail {
 		$templet = str_replace('{CONTENT}',$this->content,$templet);
 		
 		return $templet;
+		*/
 	}
-
+	/* @todo 수정필요
 	public function preview() {
 		ob_start();
 		
@@ -535,6 +572,7 @@ class ModuleEmail {
 		
 		echo $preview;
 	}
+	*/
 	
 	/**
 	 * 설정된 변수를 이용하여 메일을 발송한다.
@@ -546,35 +584,50 @@ class ModuleEmail {
 		REQUIRE_ONCE $this->getModule()->getPath().'/classes/phpmailer/class.phpmailer.php';
 		
 		if (empty($this->to) == true || $this->subject == null || $this->content == null) return false;
-		if (empty($this->from) == true) $this->from = array('arzz@arzz.com','알쯔닷컴');
+		if (empty($this->from) == true) $this->from = array($this->getModule()->getConfig('default_email'),$this->getModule()->getConfig('default_name'));
 		
-		$phpMailer = new PHPMailer();
-		$phpMailer->pluginDir = $this->getModule()->getPath().'/classes/phpmailer';
-		$phpMailer->isHTML(true);
-		$phpMailer->Encoding = 'base64';
-		$phpMailer->CharSet = 'UTF-8';
+		$PHPMailer = new PHPMailer();
+		$PHPMailer->pluginDir = $this->getModule()->getPath().'/classes/phpmailer';
+		$PHPMailer->isHTML(true);
+		$PHPMailer->Encoding = 'base64';
+		$PHPMailer->CharSet = 'UTF-8';
 		
-		if (count($this->from) == 2) $phpMailer->setFrom($this->from[0],'=?UTF-8?b?'.base64_encode($this->from[1]).'?=');
-		else $phpMailer->setFrom($this->from[0]);
+		if ($this->getModule()->getConfig('use_sendmail') === false) {
+			REQUIRE_ONCE $this->getModule()->getPath().'/classes/phpmailer/class.smtp.php';
+			
+			$PHPMailer->IsSMTP();
+			$PHPMailer->SMTPSecure = strtolower($this->getModule()->getConfig('smtp_type'));
+			$PHPMailer->Host = $this->getModule()->getConfig('smtp_server');
+			$PHPMailer->Port = $this->getModule()->getConfig('smtp_port');
+			
+			if ($this->getModule()->getConfig('smtp_id') && $this->getModule()->getConfig('smtp_password')) {
+				$PHPMailer->SMTPAuth = true;
+				$PHPMailer->Username = $this->getModule()->getConfig('smtp_id');
+				$PHPMailer->Password = $this->getModule()->getConfig('smtp_password');
+			}
+		}
 		
-		if (count($this->replyTo) == 1) $phpMailer->addReplyTo($this->replyTo[0]);
-		elseif (count($this->replyTo) == 2) $phpMailer->addReplyTo($this->replyTo[0],'=?UTF-8?b?'.base64_encode($this->replyTo[1]).'?=');
+		if (count($this->from) == 2) $PHPMailer->setFrom($this->from[0],'=?UTF-8?b?'.base64_encode($this->from[1]).'?=');
+		else $PHPMailer->setFrom($this->from[0]);
+		
+		if (count($this->replyTo) == 1) $PHPMailer->addReplyTo($this->replyTo[0]);
+		elseif (count($this->replyTo) == 2) $PHPMailer->addReplyTo($this->replyTo[0],'=?UTF-8?b?'.base64_encode($this->replyTo[1]).'?=');
 		
 		if (count($this->cc) > 0) {
 			for ($i=0, $loop=count($this->cc);$i<$loop;$i++) {
-				if (count($this->cc[$i]) == 2) $phpMailer->addBcc($this->cc[$i][0],'=?UTF-8?b?'.base64_encode($this->cc[$i][1]).'?=');
-				else $phpMailer->addBcc($this->cc[$i][0]);
+				if (count($this->cc[$i]) == 2) $PHPMailer->addBcc($this->cc[$i][0],'=?UTF-8?b?'.base64_encode($this->cc[$i][1]).'?=');
+				else $PHPMailer->addBcc($this->cc[$i][0]);
 			}
 		}
 		
 		if (count($this->bcc) > 0) {
 			for ($i=0, $loop=count($this->bcc);$i<$loop;$i++) {
-				if (count($this->bcc[$i]) == 2) $phpMailer->addBcc($this->bcc[$i][0],'=?UTF-8?b?'.base64_encode($this->bcc[$i][1]).'?=');
-				else $phpMailer->addBcc($this->bcc[$i][0]);
+				if (count($this->bcc[$i]) == 2) $PHPMailer->addBcc($this->bcc[$i][0],'=?UTF-8?b?'.base64_encode($this->bcc[$i][1]).'?=');
+				else $PHPMailer->addBcc($this->bcc[$i][0]);
 			}
 		}
 		
-		$phpMailer->Subject = '=?UTF-8?b?'.base64_encode($this->subject).'?=';
+		$PHPMailer->Subject = '=?UTF-8?b?'.base64_encode($this->subject).'?=';
 		
 		$idx = $this->db()->insert($this->table->send,array('from'=>(empty($this->from[1]) == true ? $this->from[0] : $this->from[1].' <'.$this->from[0].'>'),'subject'=>$this->subject,'content'=>$this->content,'search'=>GetString($this->content,'index'),'receiver'=>count($this->to),'reg_date'=>time()))->execute();;
 		
@@ -582,13 +635,13 @@ class ModuleEmail {
 			for ($i=0, $loop=count($this->to);$i<$loop;$i++) {
 				$receiverIdx = $this->db()->insert($this->table->receiver,array('parent'=>$idx,'to'=>empty($this->to[$i][1]) == true ? $this->to[$i][0] : $this->to[$i][1].' <'.$this->to[$i][0].'>','reg_date'=>time()))->execute();
 				
-				$phpMailer->clearAddresses();
+				$PHPMailer->clearAddresses();
 				
-				if (count($this->to[$i]) == 2) $phpMailer->addAddress($this->to[$i][0],'=?UTF-8?b?'.base64_encode($this->to[$i][1]).'?=');
-				else $phpMailer->addAddress($this->to[$i][0]);
+				if (count($this->to[$i]) == 2) $PHPMailer->addAddress($this->to[$i][0],'=?UTF-8?b?'.base64_encode($this->to[$i][1]).'?=');
+				else $PHPMailer->addAddress($this->to[$i][0]);
 				
-				$phpMailer->Body = $this->makeTemplet().PHP_EOL.'<img src="'.$this->IM->getHost().$this->IM->getProcessUrl('email','check',array('receiver'=>$receiverIdx)).'" style="width:1px; height:1px;" />';
-				$result = $phpMailer->send();
+				$PHPMailer->Body = $this->makeTemplet().PHP_EOL.'<img src="'.$this->IM->getHost().$this->IM->getProcessUrl('email','check',array('receiver'=>$receiverIdx)).'" style="width:1px; height:1px;" />';
+				$result = $PHPMailer->send();
 				
 				if ($result == true) {
 					$this->db()->update($this->table->receiver,array('status'=>'SUCCESS'))->where('idx',$receiverIdx)->execute();
@@ -597,12 +650,12 @@ class ModuleEmail {
 				}
 			}
 		} else {
-			if (count($this->from) == 2) $phpMailer->addAddress($this->from[0],'=?UTF-8?b?'.base64_encode($this->from[1]).'?=');
-			else $phpMailer->addAddress($this->from[0]);
+			if (count($this->from) == 2) $PHPMailer->addAddress($this->from[0],'=?UTF-8?b?'.base64_encode($this->from[1]).'?=');
+			else $PHPMailer->addAddress($this->from[0]);
 			
 			for ($i=0, $loop=count($this->to);$i<$loop;$i++) {
-				if (count($this->to[$i]) == 2) $phpMailer->addBCC($this->to[$i][0],'=?UTF-8?b?'.base64_encode($this->to[$i][1]).'?=');
-				else $phpMailer->addBCC($this->to[$i][0]);
+				if (count($this->to[$i]) == 2) $PHPMailer->addBCC($this->to[$i][0],'=?UTF-8?b?'.base64_encode($this->to[$i][1]).'?=');
+				else $PHPMailer->addBCC($this->to[$i][0]);
 			}
 		}
 		

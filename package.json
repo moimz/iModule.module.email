@@ -2,7 +2,7 @@
 	"id":"com.moimz.imodule.module.email",
 	"icon":"fa-envelope-o",
 	"title":{
-		"ko":"이메일관리"
+		"ko":"이메일"
 	},
 	"version":"3.0.0",
 	"author":{
@@ -25,6 +25,44 @@
 	"context":false,
 	"global":false,
 	"article":false,
+	"configs":{
+		"templet":{
+			"type":"templet",
+			"default":"default"
+		},
+		"default_email":{
+			"type":"string",
+			"default":"root@localhost"
+		},
+		"default_name":{
+			"type":"string",
+			"default":"administrator"
+		},
+		"use_sendmail":{
+			"type":"boolean",
+			"default":true
+		},
+		"smtp_server":{
+			"type":"string",
+			"default":"smtp.gmail.com"
+		},
+		"smtp_port":{
+			"type":"int",
+			"default":465
+		},
+		"smtp_type":{
+			"type":"string",
+			"default":"SSL"
+		},
+		"smtp_id":{
+			"type":"string",
+			"default":"userid@gmail.com"
+		},
+		"smtp_password":{
+			"type":"string",
+			"default":""
+		}
+	},
 	"databases":{
 		"email_receiver_table":{
 			"columns":{
