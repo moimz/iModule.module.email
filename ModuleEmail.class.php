@@ -631,6 +631,7 @@ class ModuleEmail {
 		
 		$idx = $this->db()->insert($this->table->send,array('from'=>(empty($this->from[1]) == true ? $this->from[0] : $this->from[1].' <'.$this->from[0].'>'),'subject'=>$this->subject,'content'=>$this->content,'search'=>GetString($this->content,'index'),'receiver'=>count($this->to),'reg_date'=>time()))->execute();;
 		
+		$result = false;
 		if ($isEach == true || count($this->to) == 1) {
 			for ($i=0, $loop=count($this->to);$i<$loop;$i++) {
 				$receiverIdx = $this->db()->insert($this->table->receiver,array('parent'=>$idx,'to'=>empty($this->to[$i][1]) == true ? $this->to[$i][0] : $this->to[$i][1].' <'.$this->to[$i][0].'>','reg_date'=>time()))->execute();
@@ -660,7 +661,8 @@ class ModuleEmail {
 		}
 		
 		$this->reset();
-		return;
+		
+		return $result;
 	}
 	
 	/**
