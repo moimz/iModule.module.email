@@ -6,9 +6,9 @@
  * 
  * @file /modules/email/admin/configs.php
  * @author Arzz (arzz@arzz.com)
- * @license MIT License
+ * @license GPLv3
  * @version 3.0.0
- * @modified 2017. 12. 14.
+ * @modified 2018. 3. 18.
  */
 if (defined('__IM__') == false) exit;
 ?>
@@ -17,6 +17,7 @@ var config = new Ext.form.Panel({
 	id:"ModuleConfigForm",
 	border:false,
 	bodyPadding:10,
+	width:800,
 	fieldDefaults:{labelAlign:"right",labelWidth:100,anchor:"100%",allowBlank:true},
 	items:[
 		new Ext.form.FieldSet({
