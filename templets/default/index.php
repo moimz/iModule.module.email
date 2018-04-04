@@ -14,12 +14,12 @@ if (defined('__IM__') == false) exit;
 ?>
 <table cellpadding="0" cellspacing="0" style="width:600px; margin:0 auto; font-family:sans-serif;">
 <tr>
-	<td style="padding:10px 0px; font-size:16px;">
-		<img src="<?php echo $IM->getSiteLogo('default',true); ?>" style="max-width:200px; max-height:60px;">
+	<td style="padding:10px 0px; font-size:16px; text-align:center;">
+		<img src="<?php echo $IM->getSiteEmblem(true); ?>" style="max-width:60px;">
 	</td>
 </tr>
 <tr>
-	<td style="background:#f4f4f4; padding:15px; line-height:1.6; font-size:14px;">
+	<td style="background:#f4f4f4; border-top:2px solid #222; padding:15px; line-height:1.6; font-size:14px;">
 		<?php echo $content; ?>
 	</td>
 </tr>
