@@ -23,7 +23,7 @@ var config = new Ext.form.Panel({
 		new Ext.form.FieldSet({
 			title:Email.getText("admin/configs/form/default_setting"),
 			items:[
-				Admin.templetField(Email.getText("admin/configs/form/templet"),"templet","email",false),
+				Admin.templetField(Email.getText("admin/configs/form/templet"),"templet","module","email",false),
 				new Ext.form.FieldContainer({
 					layout:"hbox",
 					items:[
