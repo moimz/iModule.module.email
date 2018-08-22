@@ -641,7 +641,7 @@ class ModuleEmail {
 				if (count($this->to[$i]) == 2) $PHPMailer->addAddress($this->to[$i][0],'=?UTF-8?b?'.base64_encode($this->to[$i][1]).'?=');
 				else $PHPMailer->addAddress($this->to[$i][0]);
 				
-				$PHPMailer->Body = $this->makeTemplet().PHP_EOL.'<img src="'.$this->IM->getHost().$this->IM->getProcessUrl('email','check',array('receiver'=>$receiverIdx)).'" style="width:1px; height:1px;" />';
+				$PHPMailer->Body = $this->makeTemplet().PHP_EOL.'<img src="'.$this->IM->getHost(true).$this->IM->getProcessUrl('email','check',array('receiver'=>$receiverIdx)).'" style="width:1px; height:1px;" />';
 				$result = $PHPMailer->send();
 				
 				if ($result == true) {
