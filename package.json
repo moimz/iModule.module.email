@@ -9,22 +9,16 @@
 		"name":"Arzz",
 		"email":"arzz@arzz.com"
 	},
-	"homepage":"https://www.imodule.kr",
-	"versionChecker":"http://www.moimz.com/ko/api/moimz/getLatest",
+	"homepage":"https://www.imodules.io",
+	"versionChecker":"https://api.moimz.com/download/latest",
 	"description":{
 		"ko":"이메일을 발송하고, 이메일의 수신결과를 관리합니다."
 	},
 	"dependencies":{
-		"core":"3.0.0",
-		"attachment":"3.0.0",
-		"wysiwyg":"3.0.0",
-		"keyword":"3.0.0"
+		"core":"3.0.0"
 	},
 	"language":"ko",
 	"admin":true,
-	"context":false,
-	"global":false,
-	"article":false,
 	"configs":{
 		"templet":{
 			"type":"templet",
@@ -68,64 +62,78 @@
 			"columns":{
 				"idx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"고유값"
 				},
 				"parent":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"발송내역고유값"
 				},
 				"to":{
 					"type":"varchar",
-					"length":150
+					"length":150,
+					"comment":"수신자"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"수신일"
 				},
 				"status":{
 					"type":"enum",
 					"length":"'SUCCESS','SENDING','FAIL'",
-					"default":"SUCCESS"
+					"default":"SUCCESS",
+					"comment":"수신결과"
 				},
 				"message":{
 					"type":"varchar",
 					"length":100,
-					"is_null":true
+					"is_null":true,
+					"comment":"수신결과 상세메세지"
 				}
 			},
 			"indexes":{
 				"idx":"primary_key",
 				"parent,status":"index"
 			},
-			"auto_increment":"idx"
+			"auto_increment":"idx",
+			"comment":"이메일 수신내역 테이블"
 		},
 		"email_send_table":{
 			"columns":{
 				"idx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"고유값"
 				},
 				"from":{
 					"type":"varchar",
-					"length":150
+					"length":150,
+					"comment":"발송자"
 				},
 				"subject":{
 					"type":"varchar",
-					"length":255
+					"length":255,
+					"comment":"메일제목"
 				},
 				"content":{
-					"type":"longtext"
+					"type":"longtext",
+					"comment":"메일본문"
 				},
 				"search":{
-					"type":"text"
+					"type":"text",
+					"comment":"메일본문(검색)"
 				},
 				"receiver":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"수신인원수"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"발송일자"
 				}
 			},
 			"indexes":{
@@ -133,7 +141,8 @@
 				"reg_date":"index",
 				"subject,search":"fulltext"
 			},
-			"auto_increment":"idx"
+			"auto_increment":"idx",
+			"comment":"이메일 발송내역 테이블"
 		}
 	}
 }
