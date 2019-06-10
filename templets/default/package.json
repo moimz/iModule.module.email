@@ -7,9 +7,16 @@
 		"name":"Arzz",
 		"email":"arzz@arzz.com"
 	},
-	"homepage":"https://www.imodule.kr",
+	"homepage":"https://www.imodules.io",
 	"language":"ko",
 	"configs":{
+		"header_color":{
+			"title":{
+				"ko":"헤더색상"
+			},
+			"type":"color",
+			"default":"#222222"
+		},
 		"footer":{
 			"title":{
 				"ko":"본문하단메세지"
