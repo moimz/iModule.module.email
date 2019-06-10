@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.0.0
- * @modified 2017. 11. 22.
+ * @modified 2019. 6. 11.
  */
 class ModuleEmail {
 	/**
@@ -137,49 +137,6 @@ class ModuleEmail {
 		if (is_file($this->getModule()->getPath().'/api/'.$api.'.'.$protocol.'.php') == true) {
 			INCLUDE $this->getModule()->getPath().'/api/'.$api.'.'.$protocol.'.php';
 		}
-		
-		/**
-		 * @todo 기존 API 복구필요
-		if ($api == 'send') {
-			$errors = array();
-			$sender_name = Request('sender_name');
-			$sender_email = CheckEmail(Request('sender_email')) == true ? Request('sender_email') : $errors['sender_email'] = $this->getLanguage('error/sender');
-			$reply_name = Request('reply_name');
-			$reply_email = CheckEmail(Request('reply_email')) == true ? Request('reply_email') : null;
-			$bcc_name = Request('bcc_name');
-			$bcc_email = CheckEmail(Request('bcc_email')) == true ? Request('bcc_email') : null;
-			$receiver_name = Request('receiver_name');
-			$receiver_email = CheckEmail(Request('receiver_email')) == true ? Request('receiver_email') : $errors['receiver_email'] = $this->getLanguage('error/receiver');
-			$subject = Request('subject') ? Request('subject') : $errors['subject'] = $this->getLanguage('error/subject');
-			$content = Request('content') ? Request('content') : $errors['content'] = $this->getLanguage('error/content');
-			$isHtml = Request('is_html') == 'true';
-			
-			if (count($errors) == 0) {
-				$this->setFrom($sender_email,$sender_name);
-				$this->addTo($receiver_email,$receiver_name);
-				$this->setSubject($subject);
-				$this->setContent($content,$isHtml);
-				
-				if ($reply_email == null) {
-					$reply_email = $sender_email;
-					$reply_name = $sender_name;
-				}
-				$this->setReplyTo($reply_email,$reply_name);
-				
-				if ($bcc_email !== null) {
-					$this->addBcc($bcc_email,$bcc_name);
-				}
-				
-				$this->send();
-				
-				$data->success = true;
-				$data->message = $this->getLanguage('success');
-			} else {
-				$data->success = false;
-				$data->errors = $errors;
-			}
-		}
-		**/
 		
 		unset($values);
 		$values = (object)get_defined_vars();
@@ -359,71 +316,6 @@ class ModuleEmail {
 		return $this->getModule()->getTemplet($templet,$templet_configs);
 	}
 	
-	/*
-	public $table = array();
-
-	protected $PHPMailer;
-	protected $templet;
-	protected $from;
-	protected $to;
-	protected $toList = array();
-	protected $subject;
-	protected $body;
-
-	public $userfile;
-	public $thumbnail;
-	
-	public function __construct($isSMTP=true) {
-		$this->table['email'] = $_ENV['code'].'_email_table';
-		$this->table['file'] = $_ENV['code'].'_email_file_table';
-		$this->table['send'] = $_ENV['code'].'_email_send_table';
-		$this->table['temp'] = $_ENV['code'].'_email_temp_table';
-		$this->templet = '';
-
-		parent::__construct('email');
-
-		$PHPMailer = new PHPMailer();
-		$PHPMailer->PluginDir = $this->modulePath.'/class/';
-
-		if ($isSMTP == true && $this->module['smtp_server']) {
-			$PHPMailer->IsSMTP();
-			$PHPMailer->SMTPSecure = $this->module['smtp_secure'];
-			$PHPMailer->Host = $this->module['smtp_server'];
-			$PHPMailer->Port = $this->module['smtp_port'];
-
-			if ($this->module['smtp_user'] && $this->module['smtp_password']) {
-				$PHPMailer->SMTPAuth = true;
-				$PHPMailer->Username = $this->module['smtp_user'];
-				$PHPMailer->Password = $this->module['smtp_password'];
-			}
-		}
-
-		$PHPMailer->IsHTML(true);
-		$PHPMailer->Encoding = 'base64';
-		$PHPMailer->CharSet = 'UTF-8';
-
-		$PHPMailer->SetFrom($this->module['email'], '=?UTF-8?b?'.base64_encode($this->module['name']).'?=');
-		$this->from = array($this->module['name'],$this->module['email']);
-		
-		$this->userfile = '/email';
-		$this->thumbnail = '/email/thumbnail';
-	}
-
-	public function SetTemplet($templet) {
-
-	}
-
-	public function GetTemplet() {
-		if ($this->templet) {
-
-		} else {
-			$templet = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">BODY, TH, TD, DIV, SPAN, P, INPUT {font-size:12px; line-height:17px;} BODY, DIV {text-align:justify;}</style></head><body>{$content}</body></html>';
-		}
-
-		return $templet;
-	}
-	*/
-	
 	/**
 	 * 메일발송에 사용된 변수를 초기화한다.
 	 */
@@ -454,34 +346,28 @@ class ModuleEmail {
 		return $this;
 	}
 	
-	function setFrom($email,$name=null) {
-		$this->from = array($email,$name);
-		/*
-		if ($email != null && $name != null && $email) {
-			$PHPMailer->SetFrom($email, '=?UTF-8?b?'.base64_encode($name).'?=');
-			if ($name) $this->from = array($name,$email);
-			else $this->from = array('',$email);
-		} elseif ($email != null && $email) {
-			$PHPMailer->SetFrom($email, '=?UTF-8?b?'.base64_encode($this->module['name']).'?=');
-			$this->from = array($this->module['name'],$email);
-		} elseif ($name != null) {
-			$PHPMailer->SetFrom($this->module['email'], '=?UTF-8?b?'.base64_encode($name).'?=');
-			if ($name) $this->from = array($name,$this->module['email']);
-			else $this->from = array('',$this->module['email']);
-		}
-		*/
+	public function addTo($email,$name='') {
+		$this->to[] = array($email,$name ? $name : '');
 		return $this;
 	}
 	
-	function setReplyTo($email,$name=null) {
-		$this->replyTo = array($email,$name);
-		
+	public function addBcc($email,$name='') {
+		$this->bcc[] = array($email,$name ? $name : '');
+		return $this;
+	}
+	
+	function setFrom($email,$name='') {
+		$this->from = array($email,$name ? $name : '');
+		return $this;
+	}
+	
+	function setReplyTo($email,$name='') {
+		$this->replyTo = array($email,$name ? $name : '');
 		return $this;
 	}
 	
 	function setSubject($subject) {
 		$this->subject = $subject;
-		
 		return $this;
 	}
 
@@ -494,26 +380,6 @@ class ModuleEmail {
 		
 		return $this;
 	}
-
-	public function addTo($email,$name='') {
-		$this->to[] = array($email,$name);
-		/*
-		if ($name) {
-			$PHPMailer->AddAddress($email, '=?UTF-8?b?'.base64_encode($name).'?=');
-			$this->to = array($name,$email);
-		} else {
-			$PHPMailer->AddAddress($email, '=?UTF-8?b?'.base64_encode($name).'?=');
-			$this->to = array('',$email);
-		}
-		*/
-		return $this;
-	}
-	
-	public function addBcc($email,$name) {
-		$this->bcc[] = array($email,$name);
-		
-		return $this;
-	}
 /*
 	public function AddAttach($filename,$filepath) {
 		if (file_exists($filepath) == false) $filepath = $_ENV['path'].$filepath;
@@ -523,7 +389,6 @@ class ModuleEmail {
 		}
 	}
 */
-	
 	
 	/**
 	 * 메일본문에 사용할 템플릿을 지정한다.
@@ -541,30 +406,7 @@ class ModuleEmail {
 		$content = $this->content;
 		
 		return $this->getTemplet()->getContext('index',get_defined_vars());
-		/*
-		if ($this->templet == null) return '<div>'.$this->content.'</div>';
-		
-		$templet = file_get_contents($this->getModule()->getPath().'/templets/'.$this->templet.'/index.html');
-		$templet = str_replace('{DIR}',$this->IM->getHost(true),$templet);
-		
-		$templet = str_replace('{SITETITLE}',$this->IM->getSiteTitle(),$templet);
-		$templet = str_replace('{SITELOGO}',$this->IM->getSiteLogo('default',true) != null ? $this->IM->getSiteLogo('default',true) : $this->IM->getHost(true).'/images/logo/default.png',$templet);
-		
-		$templet = str_replace('{SUBJECT}',$this->subject,$templet);
-		$templet = str_replace('{CONTENT}',$this->content,$templet);
-		
-		return $templet;
-		*/
 	}
-	/* @todo 수정필요
-	public function preview() {
-		ob_start();
-		
-		if ($this->templet == null) {
-			echo '<h1>'.$this->subject.'</h1>';
-			echo $this->content;
-		} else {
-			echo $this->makeTemplet();
 	
 	/**
 	 * class 스타일을 inline style 태그로 변경한다.
@@ -597,12 +439,8 @@ class ModuleEmail {
 			}
 		}
 		
-		$preview = ob_get_contents();
-		ob_end_clean();
-		
-		echo $preview;
+		return $content;
 	}
-	*/
 	
 	/**
 	 * 설정된 변수를 이용하여 메일을 발송한다.
@@ -637,22 +475,24 @@ class ModuleEmail {
 			}
 		}
 		
-		if (count($this->from) == 2) $PHPMailer->setFrom($this->from[0],'=?UTF-8?b?'.base64_encode($this->from[1]).'?=');
+		if ($this->from[1]) $PHPMailer->setFrom($this->from[0],'=?UTF-8?b?'.base64_encode($this->from[1]).'?=');
 		else $PHPMailer->setFrom($this->from[0]);
 		
-		if (count($this->replyTo) == 1) $PHPMailer->addReplyTo($this->replyTo[0]);
-		elseif (count($this->replyTo) == 2) $PHPMailer->addReplyTo($this->replyTo[0],'=?UTF-8?b?'.base64_encode($this->replyTo[1]).'?=');
+		if (count($this->replyTo) > 0) {
+			if ($this->replyTo[1]) $PHPMailer->addReplyTo($this->replyTo[0],'=?UTF-8?b?'.base64_encode($this->replyTo[1]).'?=');
+			else $PHPMailer->addReplyTo($this->replyTo[0]);
+		}
 		
 		if (count($this->cc) > 0) {
 			for ($i=0, $loop=count($this->cc);$i<$loop;$i++) {
-				if (count($this->cc[$i]) == 2) $PHPMailer->addBcc($this->cc[$i][0],'=?UTF-8?b?'.base64_encode($this->cc[$i][1]).'?=');
+				if ($this->cc[$i][1]) $PHPMailer->addBcc($this->cc[$i][0],'=?UTF-8?b?'.base64_encode($this->cc[$i][1]).'?=');
 				else $PHPMailer->addBcc($this->cc[$i][0]);
 			}
 		}
 		
 		if (count($this->bcc) > 0) {
 			for ($i=0, $loop=count($this->bcc);$i<$loop;$i++) {
-				if (count($this->bcc[$i]) == 2) $PHPMailer->addBcc($this->bcc[$i][0],'=?UTF-8?b?'.base64_encode($this->bcc[$i][1]).'?=');
+				if ($this->bcc[$i][1]) $PHPMailer->addBcc($this->bcc[$i][0],'=?UTF-8?b?'.base64_encode($this->bcc[$i][1]).'?=');
 				else $PHPMailer->addBcc($this->bcc[$i][0]);
 			}
 		}
