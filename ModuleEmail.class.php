@@ -565,6 +565,36 @@ class ModuleEmail {
 			echo $this->content;
 		} else {
 			echo $this->makeTemplet();
+	
+	/**
+	 * class 스타일을 inline style 태그로 변경한다.
+	 *
+	 * @param string $content
+	 * @param string[] $classes
+	 * @return string $content
+	 */
+	function classToInline($content,$classes=array()) {
+		if (preg_match_all('/<[a-zA-Z]+[^>]*(class="(.*?)")[^>]*>/',$content,$matches,PREG_SET_ORDER) == true) {
+			foreach ($matches as $match) {
+				$styles = array();
+				$names = explode(' ',$match[2]);
+				foreach ($names as $name) {
+					if ($name && isset($classes[$name]) == true) {
+						$styles[] = substr($classes[$name],-1) == ';' ? $classes[$name] : $classes[$name].';';
+					}
+				}
+				
+				$style = implode(' ',$styles);
+				
+				if (preg_match('/style="(.*?)"/',$match[0],$exist) == true) {
+					$replace = str_replace($exist[0],'style="'.$style.' '.$exist[1].'"',$match[0]);
+					$replace = preg_replace('/ ?'.$match[1].'/','',$replace);
+				} else {
+					$replace = str_replace($match[1],'style="'.$style.'"',$match[0]);
+				}
+				
+				$content = str_replace($match[0],$replace,$content);
+			}
 		}
 		
 		$preview = ob_get_contents();
