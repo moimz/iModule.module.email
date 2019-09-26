@@ -1115,7 +1115,7 @@ class PHPMailer
                 throw $exc;
             }
         }
-        return false;
+        return $exc->getMessage();
     }
 
     /**

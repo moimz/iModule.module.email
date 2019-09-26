@@ -514,7 +514,7 @@ class ModuleEmail {
 				$PHPMailer->Body = $this->makeTemplet().PHP_EOL.'<img src="'.$this->IM->getHost(true).$this->IM->getProcessUrl('email','check',array('receiver'=>$receiverIdx)).'" style="width:1px; height:1px;" />';
 				$result = $PHPMailer->send();
 				
-				if ($result == true) {
+				if ($result === true) {
 					$this->db()->update($this->table->receiver,array('status'=>'SUCCESS'))->where('idx',$receiverIdx)->execute();
 				} else {
 					$this->db()->update($this->table->receiver,array('status'=>'FAIL','message'=>$result))->where('idx',$receiverIdx)->execute();
