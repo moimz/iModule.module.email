@@ -17,6 +17,14 @@
 			"type":"color",
 			"default":"#222222"
 		},
+		"logo":{
+			"title":{
+				"ko":"헤더로고"
+			},
+			"type":"select",
+			"options":[["사이트 기본로고","DEFAULT"],["사이트 하단로고","FOOTER"],["사이트 엠블럼","EMBLEM"]],
+			"default":"EMBLEM"
+		},
 		"footer":{
 			"title":{
 				"ko":"본문하단메세지"

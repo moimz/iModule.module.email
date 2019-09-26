@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.0.0
- * @modified 2019. 6. 11.
+ * @modified 2019. 9. 27.
  */
 if (defined('__IM__') == false) exit;
 ?>
@@ -40,22 +40,26 @@ if (defined('__IM__') == false) exit;
 	</style>
 </head>
 <body style="width:100% !important; height:100% !important; margin:0; padding:0; background:#f4f4f4; font-family:'Apple SD Gothic Neo', 'malgun gothic', Helvetica, Georgia, Arial, sans-serif !important;">
-	<table border="0" cellpadding="0" cellspacing="0" width="100%" style="width:100% !important; height:100% !important; margin:0; padding:0; background:#f4f4f4; font-family:'Apple SD Gothic Neo', 'malgun gothic', Helvetica, Georgia, Arial, sans-serif !important;">
+	<table border="0" cellpadding="0" cellspacing="0" width="100%" style="width:100% !important; height:100% !important; margin:0; padding:0; background:#f4f4f4;">
 		<tr>
 			<td align="center">
-				<table cellpadding="0" cellspacing="0" width="500" style="background:#fff;">
+				<table cellpadding="0" cellspacing="0" width="540" style="background:#fff;">
 					<tr>
-						<td style="background:<?php echo $Templet->getConfig('header_color'); ?>; padding:20px 0px; font-size:16px; text-align:center;">
-							<img src="<?php echo $IM->getSiteEmblem(true); ?>" width="60">
+						<td style="background:<?php echo $Templet->getConfig('header_color'); ?>; padding:30px 0px; font-size:0; text-align:center;">
+							<?php if ($Templet->getConfig('logo') == 'EMBLEM') { ?>
+							<img src="<?php echo $IM->getSiteEmblem(true); ?>" width="50">
+							<?php } else { ?>
+							<img src="<?php echo $IM->getSiteLogo(strtolower($Templet->getConfig('logo')),true); ?>" height="50" />
+							<?php } ?>
 						</td>
 					</tr>
 					<tr>
-						<td style="padding:15px; line-height:1.6; font-size:14px;">
+						<td style="padding:20px; line-height:1.6; font-size:14px;">
 							<?php echo $content; ?>
 						</td>
 					</tr>
 					<tr>
-						<td style="background:#e5e5e5; font-size:12px; color:#666; padding:15px; line-height:1.6; word-break:break-all;">
+						<td style="background:#e5e5e5; font-size:12px; color:#666; padding:20px; line-height:1.6; word-break:break-all;">
 							<?php echo nl2br($Templet->getConfig('footer')); ?>
 						</td>
 					</tr>
