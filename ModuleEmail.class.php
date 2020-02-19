@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.0.0
- * @modified 2019. 6. 11.
+ * @modified 2020. 2. 19.
  */
 class ModuleEmail {
 	/**
@@ -48,6 +48,7 @@ class ModuleEmail {
 	 * @private string $subject 제목
 	 * @private string $content 내용
 	 * @private string $templet 이메일 내용 템플릿
+	 * @private boolean $is_push 알림메시지 발송여부
 	 */
 	private $domain = null;
 	private $language = null;
@@ -59,6 +60,7 @@ class ModuleEmail {
 	private $subject = null;
 	private $content = null;
 	private $templet = '#';
+	private $is_push = false;
 	
 	/**
 	 * class 선언
@@ -330,6 +332,7 @@ class ModuleEmail {
 		$this->templet = '#';
 		$this->domain = null;
 		$this->language = null;
+		$this->is_push = false;
 	}
 	
 	/**
@@ -398,6 +401,18 @@ class ModuleEmail {
 	 */
 	function setTemplet($templet) {
 		$this->templet = $templet;
+		return $this;
+	}
+	
+	/**
+	 * 알림메시지 여부를 입력한다.
+	 *
+	 * @param boolean $is_push
+	 * @return $this
+	 */
+	function setPush($is_push) {
+		$this->is_push = true;
+		
 		return $this;
 	}
 
@@ -499,7 +514,7 @@ class ModuleEmail {
 		
 		$PHPMailer->Subject = '=?UTF-8?b?'.base64_encode($this->subject).'?=';
 		
-		$idx = $this->db()->insert($this->table->send,array('from'=>(empty($this->from[1]) == true ? $this->from[0] : $this->from[1].' <'.$this->from[0].'>'),'subject'=>$this->subject,'content'=>$this->content,'search'=>GetString($this->content,'index'),'receiver'=>count($this->to),'reg_date'=>time()))->execute();;
+		$idx = $this->db()->insert($this->table->send,array('from'=>(empty($this->from[1]) == true ? $this->from[0] : $this->from[1].' <'.$this->from[0].'>'),'subject'=>$this->subject,'content'=>$this->content,'search'=>GetString($this->content,'index'),'receiver'=>count($this->to),'is_push'=>($this->is_push == true ? 'TRUE' : 'FALSE'),'reg_date'=>time()))->execute();;
 		
 		$result = false;
 		if ($isEach == true || count($this->to) == 1) {

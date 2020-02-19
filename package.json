@@ -134,6 +134,12 @@
 					"type":"int",
 					"length":11,
 					"comment":"발송일자"
+				},
+				"is_push":{
+					"type":"enum",
+					"length":"'TRUE','FALSE'",
+					"default":"FALSE",
+					"comment":"알림메시지여부"
 				}
 			},
 			"indexes":{

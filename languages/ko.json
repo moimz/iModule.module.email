@@ -1,5 +1,9 @@
 {
 	"success":"성공적으로 발송하였습니다.",
+	"status":{
+		"SUCCESS":"성공",
+		"FAIL":"실패"
+	},
 	"error":{
 		"sender":"보내는 사람 메일주소가 잘못되었습니다.",
 		"receiver":"받는 사람 메일주소가 잘못되었습니다.",
@@ -23,6 +27,27 @@
 				"smtp_id":"SMTP 아이디",
 				"smtp_password":"패스워드",
 				"smtp_id_help":"외부 SMTP 서버에 인증이 필요할 경우 SMTP 서버 인증정보를 입력하여 주십시오."
+			}
+		},
+		"list":{
+			"title":"이메일발송기록",
+			"write":"이메일발송",
+			"delete":"선택기록삭제",
+			"keyword":"검색어",
+			"all_period":"전체기간",
+			"keycodes":{
+				"from":"발송자",
+				"to":"수신자",
+				"subject":"제목",
+				"message":"내용"
+			},
+			"columns":{
+				"to":"수신자",
+				"from":"발송자",
+				"subject":"제목",
+				"send_date":"발송일자",
+				"receive_date":"수신일자",
+				"status":"전송결과"
 			}
 		}
 	}
