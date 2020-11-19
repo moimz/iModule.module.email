@@ -46,7 +46,7 @@
 		},
 		"smtp_type":{
 			"type":"string",
-			"default":"SSL"
+			"default":"TLS"
 		},
 		"smtp_id":{
 			"type":"string",

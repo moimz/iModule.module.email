@@ -479,7 +479,9 @@ class ModuleEmail {
 			REQUIRE_ONCE $this->getModule()->getPath().'/classes/phpmailer/class.smtp.php';
 			
 			$PHPMailer->IsSMTP();
-			$PHPMailer->SMTPSecure = strtolower($this->getModule()->getConfig('smtp_type'));
+			if ($this->getModule()->getConfig('smtp_type') != 'NONE') {
+				$PHPMailer->SMTPSecure = strtolower($this->getModule()->getConfig('smtp_type'));
+			}
 			$PHPMailer->Host = $this->getModule()->getConfig('smtp_server');
 			$PHPMailer->Port = $this->getModule()->getConfig('smtp_port');
 			

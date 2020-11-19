@@ -83,7 +83,7 @@ var config = new Ext.form.Panel({
 							disabled:true,
 							store:new Ext.data.ArrayStore({
 								fields:["value"],
-								data:[["TLS"],["SSL"]]
+								data:[["NONE"],["TLS"],["SSL"]]
 							}),
 							displayField:"value",
 							valueField:"value",
