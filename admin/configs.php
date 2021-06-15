@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license GPLv3
  * @version 3.0.0
- * @modified 2018. 3. 18.
+ * @modified 2021. 6. 15.
  */
 if (defined('__IM__') == false) exit;
 ?>
@@ -113,6 +113,77 @@ var config = new Ext.form.Panel({
 				})
 			]
 		})
-	]
+	],
+	listeners:{
+		afterrender:function() {
+			Ext.getCmp("ModuleConfigsWindow").getDockedItems()[1].insert(0,"->");
+			Ext.getCmp("ModuleConfigsWindow").getDockedItems()[1].insert(0,new Ext.Button({
+				iconCls:"xi xi-letter",
+				text:Email.getText("admin/configs/form/send_test"),
+				handler:function() {
+					new Ext.Window({
+						id:"ModuleEmailSendTestWindow",
+						title:Email.getText("admin/configs/form/send_test"),
+						width:300,
+						modal:true,
+						border:false,
+						items:[
+							new Ext.form.Panel({
+								id:"ModuleEmailSendTestForm",
+								border:false,
+								bodyPadding:"10 10 5 10",
+								items:[
+									new Ext.form.TextField({
+										name:"email",
+										allowBlank:false,
+										anchor:"100%",
+										emptyText:Email.getText("admin/list/columns/to")
+									})
+								]
+							})
+						],
+						buttons:[
+							new Ext.Button({
+								text:Admin.getText("button/confirm"),
+								handler:function() {
+									if (Ext.getCmp("ModuleEmailSendTestForm").getForm().isValid() == false) return;
+									
+									Ext.getCmp("ModuleConfigForm").getForm().submit({
+										url:ENV.getProcessUrl("email","@sendTest"),
+										params:{receiver:Ext.getCmp("ModuleEmailSendTestForm").getForm().findField("email").getValue()},
+										submitEmptyText:false,
+										waitTitle:Admin.getText("action/wait"),
+										waitMsg:Admin.getText("action/saving"),
+										success:function(form,action) {
+											Ext.Msg.show({title:Admin.getText("alert/info"),msg:Email.getText("action/test_sended"),buttons:Ext.Msg.OK,icon:Ext.Msg.INFO,fn:function() {
+												Ext.getCmp("ModuleEmailSendTestWindow").close();
+											}});
+										},
+										failure:function(form,action) {
+											if (action.result) {
+												if (action.result.message) {
+													Ext.Msg.show({title:Admin.getText("alert/error"),msg:action.result.message,buttons:Ext.Msg.OK,icon:Ext.Msg.ERROR});
+												} else {
+													Ext.Msg.show({title:Admin.getText("alert/error"),msg:Email.getText("action/test_failed"),buttons:Ext.Msg.OK,icon:Ext.Msg.ERROR});
+												}
+											} else {
+												Ext.Msg.show({title:Admin.getText("alert/error"),msg:Admin.getErrorText("INVALID_FORM_DATA"),buttons:Ext.Msg.OK,icon:Ext.Msg.ERROR});
+											}
+										}
+									});
+								}
+							}),
+							new Ext.Button({
+								text:Admin.getText("button/cancel"),
+								handler:function() {
+									Ext.getCmp("ModuleEmailSendTestWindow").close();
+								}
+							})
+						]
+					}).show();
+				}
+			}));
+		}
+	}
 });
 </script>
