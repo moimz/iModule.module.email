@@ -7,8 +7,8 @@
  * @file /modules/email/ModuleEmail.class.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0
- * @modified 2020. 2. 19.
+ * @version 3.1.0
+ * @modified 2021. 6. 22.
  */
 class ModuleEmail {
 	/**
@@ -40,11 +40,8 @@ class ModuleEmail {
 	 *
 	 * @private string $domain 메일을 발송하는 도메인주소 (@see $this->IM->doamin)
 	 * @private string $language 메일을 발송하는 사이트의 언어셋 (@see $this->IM->languge)
-	 * @private string[] $from 보내는사람 [이메일주소, 이름]
-	 * @private string[] $to 받는사람 [이메일주소, 이름]
-	 * @private string[] $replyTo 답장받는사람 [이메일주소, 이름]
-	 * @private string[] $cc 참조 [이메일주소, 이름]
-	 * @private string[] $bcc 숨은참조 [이메일주소, 이름]
+	 * @private object $sender 발송자
+	 * @private object $receiver 수신자
 	 * @private string $subject 제목
 	 * @private string $content 내용
 	 * @private string $templet 이메일 내용 템플릿
@@ -52,11 +49,8 @@ class ModuleEmail {
 	 */
 	private $domain = null;
 	private $language = null;
-	private $from = array();
-	private $to = array();
-	private $replyTo = array();
-	private $cc = array();
-	private $bcc = array();
+	private $sender = null;
+	private $receiver = null;
 	private $subject = null;
 	private $content = null;
 	private $templet = '#';
@@ -83,7 +77,6 @@ class ModuleEmail {
 		 */
 		$this->table = new stdClass();
 		$this->table->send = 'email_send_table';
-		$this->table->receiver = 'email_receiver_table';
 	}
 	
 	/**
@@ -114,6 +107,24 @@ class ModuleEmail {
 	 */
 	function getTable($table) {
 		return empty($this->table->$table) == true ? null : $this->table->$table;
+	}
+	
+	/**
+	 * view 값을 가져온다.
+	 *
+	 * @return string $view
+	 */
+	function getView() {
+		return $this->IM->getView();
+	}
+	
+	/**
+	 * idx 값을 가져온다.
+	 *
+	 * @return string $idx
+	 */
+	function getIdx() {
+		return $this->IM->getIdx();
 	}
 	
 	/**
@@ -263,18 +274,6 @@ class ModuleEmail {
 
 		$description = null;
 		switch ($code) {
-			case 'NOT_ALLOWED_SIGNUP' :
-				if ($value != null && is_object($value) == true) {
-					$description = $value->title;
-				}
-				break;
-
-			case 'DISABLED_LOGIN' :
-				if ($value != null && is_numeric($value) == true) {
-					$description = str_replace('{SECOND}',$value,$this->getText('text/remain_time_second'));
-				}
-				break;
-
 			default :
 				if (is_object($value) == false && $value) $description = $value;
 		}
@@ -319,14 +318,51 @@ class ModuleEmail {
 	}
 	
 	/**
+	 * 모듈 외부컨테이너를 가져온다.
+	 *
+	 * @param string $container 컨테이너명
+	 * @return string $html 컨텍스트 HTML / FileBytes 파일 바이너리
+	 */
+	function getContainer($container) {
+		$this->IM->removeTemplet();
+		
+		switch ($container) {
+			case 'readed' :
+				$idx = $this->getView() ? $this->getView() : 0;
+				$check = $this->db()->select($this->table->send)->where('idx',$idx)->getOne();
+				if ($check != null && $check->readed == 0) {
+					$this->db()->update($this->table->send,array('readed'=>time()))->where('idx',$idx)->execute();
+				}
+				
+				$mime = 'image/png';
+				$path = $this->getModule()->getPath().'/images/t.png';
+				
+				header('Content-Type: '.$mime);
+				header('Content-Length: '.filesize($path));
+				readfile($path);
+				exit;
+				
+			case 'view' :
+				if ($this->IM->getModule('member')->isAdmin() == false) return $this->IM->printError('FORBIDDEN');
+				$idx = $this->getView() ? $this->getView() : 0;
+				$check = $this->db()->select($this->table->send)->where('idx',$idx)->getOne();
+				if ($check == null) return $this->IM->printError('NOT_FOUND');
+				
+				exit($check->content);
+		}
+		
+		$footer = $this->IM->getFooter();
+		$header = $this->IM->getHeader();
+		
+		return $header.$html.$footer;
+	}
+	
+	/**
 	 * 메일발송에 사용된 변수를 초기화한다.
 	 */
 	function reset() {
-		$this->from = array();
-		$this->to = array();
-		$this->replyTo = array();
-		$this->bcc = array();
-		$this->cc = array();
+		$this->sender = null;
+		$this->receiver = null;
 		$this->subject = null;
 		$this->content = null;
 		$this->templet = '#';
@@ -349,32 +385,70 @@ class ModuleEmail {
 		return $this;
 	}
 	
-	public function addTo($email,$name='') {
-		$this->to[] = array($email,$name ? $name : '');
+	/**
+	 * 발송자 정보를 입력한다.
+	 *
+	 * @param int $midx 발송회원고유번호 (없을경우 현재 로그인한 사용자)
+	 * @param string $email 발송자이메일주소 (없을경우 $midx 회원 이메일주소)
+	 * @param string $name 발송자명 (없을경우 $midx 회원 닉네임)
+	 * @return ModuleEmail $this
+	 */
+	function setSender($midx=null,$email=null,$name=null) {
+		$this->sender = new stdClass();
+		$this->sender->midx = $midx ? $midx : $this->IM->getModule('member')->getLogged();
+		$this->sender->email = $email ? $email : $this->IM->getModule('member')->getMember($this->sender->midx)->email;
+		$this->sender->name = $name ? $name : $this->IM->getModule('member')->getMember($this->sender->midx)->nickname;
+		
 		return $this;
 	}
 	
-	public function addBcc($email,$name='') {
-		$this->bcc[] = array($email,$name ? $name : '');
+	/**
+	 * 발송자 정보를 초기화하고, 모듈 기본설정을 사용하도록 설정한다.
+	 *
+	 * @return ModuleEmail $this
+	 */
+	function resetSender() {
+		$this->sender = null;
+		
 		return $this;
 	}
 	
-	function setFrom($email,$name='') {
-		$this->from = array($email,$name ? $name : '');
+	/**
+	 * 수신자 정보를 입력한다.
+	 *
+	 * @param int $midx 받는회원고유번호 (없을경우 현재 로그인한 사용자)
+	 * @param string $email 수신자이메일주소 (없을경우 $midx 회원 이메일주소)
+	 * @param string $name 수신자명 (없을경우 $midx 회원 닉네임)
+	 * @return ModuleEmail $this
+	 */
+	function setReceiver($midx=null,$email=null,$name=null) {
+		$this->receiver = new stdClass();
+		$this->receiver->midx = $midx ? $midx : $this->IM->getModule('member')->getLogged();
+		$this->receiver->email = $email ? $email : $this->IM->getModule('member')->getMember($this->receiver->midx)->email;
+		$this->receiver->name = $name ? $name : $this->IM->getModule('member')->getMember($this->receiver->midx)->nickname;
+		
 		return $this;
 	}
 	
-	function setReplyTo($email,$name='') {
-		$this->replyTo = array($email,$name ? $name : '');
-		return $this;
-	}
-	
+	/**
+	 * 메일제목을 입력한다.
+	 *
+	 * @param string $subject 메일제목
+	 * @return ModuleEmail $this
+	 */
 	function setSubject($subject) {
 		$this->subject = $subject;
 		return $this;
 	}
-
-	public function setContent($content,$isHtml=false) {
+	
+	/**
+	 * 메일본문을 입력한다.
+	 *
+	 * @param string $content 메일내용
+	 * @param boolean $isHtml HTML여부
+	 * @return ModuleEmail $this
+	 */
+	function setContent($content,$isHtml=false) {
 		if ($isHtml == false) {
 			$this->content = nl2br($content);
 		} else {
@@ -383,16 +457,15 @@ class ModuleEmail {
 		
 		return $this;
 	}
-/*
-	public function AddAttach($filename,$filepath) {
+	/*
+	function AddAttach($filename,$filepath) {
 		if (file_exists($filepath) == false) $filepath = $_ENV['path'].$filepath;
 
 		if (file_exists($filepath) == true && filesize($filepath) < 10*1024*1024) {
 			$PHPMailer->AddAttachment($filepath,$filename);
 		}
 	}
-*/
-	
+	*/
 	/**
 	 * 메일본문에 사용할 템플릿을 지정한다.
 	 *
@@ -408,14 +481,19 @@ class ModuleEmail {
 	 * 알림메시지 여부를 입력한다.
 	 *
 	 * @param boolean $is_push
-	 * @return $this
+	 * @return ModuleEmail $this
 	 */
 	function setPush($is_push) {
 		$this->is_push = true;
 		
 		return $this;
 	}
-
+	
+	/**
+	 * 템플릿 컨텐츠을 가져온다.
+	 *
+	 * @return string $html
+	 */
 	function makeTemplet() {
 		$subject = $this->subject;
 		$content = $this->content;
@@ -460,14 +538,20 @@ class ModuleEmail {
 	/**
 	 * 설정된 변수를 이용하여 메일을 발송한다.
 	 *
-	 * @param boolean $isEach 여러명에게 메일을 보낼때 각자 보낼지 설정한다. (false 일 경우 모든 받는사람은 BCC로 지정되어 발송된다.)
 	 * @return boolean $success
 	 */
-	public function send($isEach=false) {
+	function send() {
 		REQUIRE_ONCE $this->getModule()->getPath().'/classes/phpmailer/class.phpmailer.php';
 		
-		if (empty($this->to) == true || $this->subject == null || $this->content == null) return false;
-		if (empty($this->from) == true) $this->from = array($this->getModule()->getConfig('default_email'),$this->getModule()->getConfig('default_name'));
+		if ($this->receiver == null || $this->subject == null || $this->content == null) return false;
+		if (!$this->receiver->email) return false;
+		
+		if ($this->sender == null) {
+			$this->sender = new stdClass();
+			$this->sender->midx = $this->IM->getModule('member')->getLogged();
+			$this->sender->email = $this->getModule()->getConfig('default_email');
+			$this->sender->name = $this->getModule()->getConfig('default_name');
+		}
 		
 		$PHPMailer = new PHPMailer();
 		$PHPMailer->pluginDir = $this->getModule()->getPath().'/classes/phpmailer';
@@ -492,59 +576,31 @@ class ModuleEmail {
 			}
 		}
 		
-		if ($this->from[1]) $PHPMailer->setFrom($this->from[0],'=?UTF-8?b?'.base64_encode($this->from[1]).'?=');
-		else $PHPMailer->setFrom($this->from[0]);
-		
-		if (count($this->replyTo) > 0) {
-			if ($this->replyTo[1]) $PHPMailer->addReplyTo($this->replyTo[0],'=?UTF-8?b?'.base64_encode($this->replyTo[1]).'?=');
-			else $PHPMailer->addReplyTo($this->replyTo[0]);
-		}
-		
-		if (count($this->cc) > 0) {
-			for ($i=0, $loop=count($this->cc);$i<$loop;$i++) {
-				if ($this->cc[$i][1]) $PHPMailer->addBcc($this->cc[$i][0],'=?UTF-8?b?'.base64_encode($this->cc[$i][1]).'?=');
-				else $PHPMailer->addBcc($this->cc[$i][0]);
-			}
-		}
-		
-		if (count($this->bcc) > 0) {
-			for ($i=0, $loop=count($this->bcc);$i<$loop;$i++) {
-				if ($this->bcc[$i][1]) $PHPMailer->addBcc($this->bcc[$i][0],'=?UTF-8?b?'.base64_encode($this->bcc[$i][1]).'?=');
-				else $PHPMailer->addBcc($this->bcc[$i][0]);
-			}
-		}
-		
+		$PHPMailer->setFrom($this->sender->email,($this->sender->name ? '=?UTF-8?b?'.base64_encode($this->sender->name).'?=' : ''));
+		$PHPMailer->addAddress($this->receiver->email,($this->receiver->name ? '=?UTF-8?b?'.base64_encode($this->receiver->name).'?=' : ''));
 		$PHPMailer->Subject = '=?UTF-8?b?'.base64_encode($this->subject).'?=';
+		$PHPMailer->Body = $this->makeTemplet();
 		
-		$idx = $this->db()->insert($this->table->send,array('from'=>(empty($this->from[1]) == true ? $this->from[0] : $this->from[1].' <'.$this->from[0].'>'),'subject'=>$this->subject,'content'=>$this->content,'search'=>GetString($this->content,'index'),'receiver'=>count($this->to),'is_push'=>($this->is_push == true ? 'TRUE' : 'FALSE'),'reg_date'=>time()))->execute();;
+		$insert = array();
+		$insert['frommidx'] = $this->sender->midx ? $this->sender->midx : 0;
+		$insert['tomidx'] = $this->receiver->midx ? $this->receiver->midx : 0;
+		$insert['sender'] = $this->sender->name ? $this->sender->name.' <'.$this->sender->email.'>' : $this->sender->email;
+		$insert['receiver'] = $this->receiver->name ? $this->receiver->name.' <'.$this->receiver->email.'>' : $this->receiver->email;
+		$insert['subject'] = $this->subject;
+		$insert['content'] = $PHPMailer->Body;
+		$insert['search'] = GetString($this->content,'index');
+		$insert['is_push'] = $this->is_push == true ? 'TRUE' : 'FALSE';
+		$insert['reg_date'] = time();
+		$insert['status'] = 'WAIT';
 		
-		$result = false;
-		if ($isEach == true || count($this->to) == 1) {
-			for ($i=0, $loop=count($this->to);$i<$loop;$i++) {
-				$receiverIdx = $this->db()->insert($this->table->receiver,array('parent'=>$idx,'to'=>empty($this->to[$i][1]) == true ? $this->to[$i][0] : $this->to[$i][1].' <'.$this->to[$i][0].'>','reg_date'=>time()))->execute();
-				
-				$PHPMailer->clearAddresses();
-				
-				if (count($this->to[$i]) == 2) $PHPMailer->addAddress($this->to[$i][0],'=?UTF-8?b?'.base64_encode($this->to[$i][1]).'?=');
-				else $PHPMailer->addAddress($this->to[$i][0]);
-				
-				$PHPMailer->Body = $this->makeTemplet().PHP_EOL.'<img src="'.$this->IM->getHost(true).$this->IM->getProcessUrl('email','check',array('receiver'=>$receiverIdx)).'" style="width:1px; height:1px;" />';
-				$result = $PHPMailer->send();
-				
-				if ($result === true) {
-					$this->db()->update($this->table->receiver,array('status'=>'SUCCESS'))->where('idx',$receiverIdx)->execute();
-				} else {
-					$this->db()->update($this->table->receiver,array('status'=>'FAIL','message'=>$result))->where('idx',$receiverIdx)->execute();
-				}
-			}
+		$idx = $this->db()->insert($this->table->send,$insert)->execute();
+		
+		$PHPMailer->Body.= PHP_EOL.'<img src="'.$this->IM->getModuleUrl('email','readed',$idx,'t.png',true,$this->domain,$this->language).'" style="width:1px; height:1px;" />';
+		$result = $PHPMailer->send();
+		if ($result === true) {
+			$this->db()->update($this->table->send,array('status'=>'SUCCESS'))->where('idx',$idx)->execute();
 		} else {
-			if (count($this->from) == 2) $PHPMailer->addAddress($this->from[0],'=?UTF-8?b?'.base64_encode($this->from[1]).'?=');
-			else $PHPMailer->addAddress($this->from[0]);
-			
-			for ($i=0, $loop=count($this->to);$i<$loop;$i++) {
-				if (count($this->to[$i]) == 2) $PHPMailer->addBCC($this->to[$i][0],'=?UTF-8?b?'.base64_encode($this->to[$i][1]).'?=');
-				else $PHPMailer->addBCC($this->to[$i][0]);
-			}
+			$this->db()->update($this->table->send,array('status'=>'FAIL'))->where('idx',$idx)->execute();
 		}
 		
 		$this->reset();

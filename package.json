@@ -4,7 +4,7 @@
 	"title":{
 		"ko":"이메일"
 	},
-	"version":"3.0.0",
+	"version":"3.1.0",
 	"author":{
 		"name":"Arzz",
 		"email":"arzz@arzz.com"
@@ -58,48 +58,6 @@
 		}
 	},
 	"databases":{
-		"email_receiver_table":{
-			"columns":{
-				"idx":{
-					"type":"int",
-					"length":11,
-					"comment":"고유값"
-				},
-				"parent":{
-					"type":"int",
-					"length":11,
-					"comment":"발송내역고유값"
-				},
-				"to":{
-					"type":"varchar",
-					"length":150,
-					"comment":"수신자"
-				},
-				"reg_date":{
-					"type":"int",
-					"length":11,
-					"comment":"수신일"
-				},
-				"status":{
-					"type":"enum",
-					"length":"'SUCCESS','SENDING','FAIL'",
-					"default":"SUCCESS",
-					"comment":"수신결과"
-				},
-				"message":{
-					"type":"varchar",
-					"length":100,
-					"is_null":true,
-					"comment":"수신결과 상세메세지"
-				}
-			},
-			"indexes":{
-				"idx":"primary_key",
-				"parent,status":"index"
-			},
-			"auto_increment":"idx",
-			"comment":"이메일 수신내역 테이블"
-		},
 		"email_send_table":{
 			"columns":{
 				"idx":{
@@ -107,10 +65,25 @@
 					"length":11,
 					"comment":"고유값"
 				},
-				"from":{
+				"frommidx":{
+					"type":"int",
+					"length":11,
+					"comment":"발송회원고유값"
+				},
+				"tomidx":{
+					"type":"int",
+					"length":11,
+					"comment":"수신회원고유값"
+				},
+				"sender":{
 					"type":"varchar",
 					"length":150,
 					"comment":"발송자"
+				},
+				"receiver":{
+					"type":"varchar",
+					"length":150,
+					"comment":"수신자"
 				},
 				"subject":{
 					"type":"varchar",
@@ -125,21 +98,28 @@
 					"type":"text",
 					"comment":"메일본문(검색)"
 				},
-				"receiver":{
-					"type":"int",
-					"length":11,
-					"comment":"수신인원수"
+				"is_push":{
+					"type":"enum",
+					"length":"'TRUE','FALSE'",
+					"default":"FALSE",
+					"comment":"알림메시지여부"
 				},
 				"reg_date":{
 					"type":"int",
 					"length":11,
 					"comment":"발송일자"
 				},
-				"is_push":{
+				"readed":{
+					"type":"int",
+					"length":11,
+					"default":0,
+					"comment":"확인일자"
+				},
+				"status":{
 					"type":"enum",
-					"length":"'TRUE','FALSE'",
-					"default":"FALSE",
-					"comment":"알림메시지여부"
+					"length":"'WAIT','SUCCESS','FAIL'",
+					"default":"WAIT",
+					"comment":"전송상태"
 				}
 			},
 			"indexes":{

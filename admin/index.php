@@ -7,8 +7,8 @@
  * @file /modules/email/admin/index.php
  * @author Arzz (arzz@arzz.com)
  * @license GPLv3
- * @version 3.0.0
- * @modified 2020. 2. 19.
+ * @version 3.1.0
+ * @modified 2021. 6. 22.
  */
 if (defined('__IM__') == false) exit;
 ?>
@@ -161,7 +161,7 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 					sorters:[{property:"reg_date",direction:"DESC"}],
 					autoLoad:true,
 					pageSize:50,
-					fields:["receiver","receiver_name","sender","sender_name","message","reg_date","status"],
+					fields:["idx","sender","sender_photo","receiver","receiver_photo","subject","reg_date","status"],
 					listeners:{
 						load:function(store,records,success,e) {
 							if (success == false) {
@@ -175,15 +175,21 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 					}
 				}),
 				columns:[{
-					text:Email.getText("admin/list/columns/to"),
+					text:Email.getText("admin/list/columns/sender"),
 					width:200,
 					sortable:true,
-					dataIndex:"to"
+					dataIndex:"sender",
+					renderer:function(value,p,record) {
+						return '<i style="width:24px; height:24px; float:left; display:block; background:url('+record.data.sender_photo+'); background-size:cover; background-repeat:no-repeat; border:1px solid #ccc; border-radius:50%; margin:-3px 5px -3px -5px;"></i>' + value;
+					}
 				},{
-					text:Email.getText("admin/list/columns/from"),
+					text:Email.getText("admin/list/columns/receiver"),
 					width:200,
 					sortable:true,
-					dataIndex:"from"
+					dataIndex:"receiver",
+					renderer:function(value,p,record) {
+						return '<i style="width:24px; height:24px; float:left; display:block; background:url('+record.data.receiver_photo+'); background-size:cover; background-repeat:no-repeat; border:1px solid #ccc; border-radius:50%; margin:-3px 5px -3px -5px;"></i>' + value;
+					}
 				},{
 					text:Email.getText("admin/list/columns/subject"),
 					minWidth:200,
@@ -197,22 +203,22 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 						return sHTML;
 					}
 				},{
-					text:Email.getText("admin/list/columns/send_date"),
-					width:130,
+					text:Email.getText("admin/list/columns/reg_date"),
+					width:145,
 					align:"center",
-					dataIndex:"send_date",
+					dataIndex:"reg_date",
 					sortable:true,
 					renderer:function(value) {
-						return moment(value * 1000).format("YYYY-MM-DD HH:mm");
+						return value > 0 ? moment(value * 1000).locale($("html").attr("lang")).format("YYYY.MM.DD(dd) HH:mm") : "";
 					}
 				},{
-					text:Email.getText("admin/list/columns/receive_date"),
-					width:130,
+					text:Email.getText("admin/list/columns/readed"),
+					width:145,
 					align:"center",
-					dataIndex:"receive_date",
+					dataIndex:"readed",
 					sortable:true,
 					renderer:function(value) {
-						return moment(value * 1000).format("YYYY-MM-DD HH:mm");
+						return value > 0 ? moment(value * 1000).locale($("html").attr("lang")).format("YYYY.MM.DD(dd) HH:mm") : "";
 					}
 				},{
 					text:Email.getText("admin/list/columns/status"),

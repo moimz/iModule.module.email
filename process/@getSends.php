@@ -7,8 +7,8 @@
  * @file /modules/email/process/@getSends.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0
- * @modified 2020. 2. 19.
+ * @version 3.1.0
+ * @modified 2021. 6. 22.
  */
 if (defined('__IM__') == false) exit;
 
@@ -24,28 +24,30 @@ $keycode = Request('keycode');
 $keyword = Request('keyword');
 $is_push = Request('is_push');
 
-$lists = $this->db()->select($this->table->send.' s','s.idx, s.from, s.subject, s.search, s.reg_date as send_date, r.to, r.status, r.reg_date as receive_date')->join($this->table->receiver.' r','r.parent=s.idx','LEFT')->where('s.reg_date',$start_date,'>=')->where('s.reg_date',$end_date,'<');
-if ($is_push) $lists->where('s.is_push',$is_push);
+$lists = $this->db()->select($this->table->send,'idx, frommidx, tomidx, sender, receiver, subject, reg_date, readed, status')->where('reg_date',$start_date,'>=')->where('reg_date',$end_date,'<');
+if ($is_push) $lists->where('is_push',$is_push);
 if ($keyword) {
-	if ($keycode == 'from') $lists->where('s.from','%'.$keyword.'%','LIKE');
-	if ($keycode == 'to') $lists->where('r.to','%'.$keyword.'%','LIKE');
+	if ($keycode == 'sender') $lists->where('sender','%'.$keyword.'%','LIKE');
+	if ($keycode == 'receiver') $lists->where('s.receiver','%'.$keyword.'%','LIKE');
 	if ($keycode == 'subject') $lists->where('s.subject','%'.$keyword.'%','LIKE');
-	if ($keycode == 'message') $this->IM->getModule('keyword')->getWhere($lists,array('subject','search'),$keyword);
+	if ($keycode == 'content') $this->IM->getModule('keyword')->getWhere($lists,array('subject','search'),$keyword);
 }
 
 $total = $lists->copy()->count();
 if ($limit > 0) $lists->limit($start,$limit);
 if ($sort == 'send_date') {
-	$lists->orderBy('s.reg_date',$dir);
+	$lists->orderBy('reg_date',$dir);
 } elseif ($sort == 'receive_date') {
-	$lists->orderBy('s.receive_date',$dir);
+	$lists->orderBy('receive_date',$dir);
 } else {
-	$lists->orderBy('s.'.$sort,$dir);
+	$lists->orderBy($sort,$dir);
 }
 $lists = $lists->get();
 for ($i=0, $loop=count($lists);$i<$loop;$i++) {
-	$lists[$i]->to = GetString($lists[$i]->to,'replace');
-	$lists[$i]->from = GetString($lists[$i]->from,'replace');
+	$lists[$i]->sender = GetString($lists[$i]->sender,'replace');
+	$lists[$i]->sender_photo = $this->IM->getModule('member')->getMemberPhotoUrl($lists[$i]->frommidx);
+	$lists[$i]->receiver = GetString($lists[$i]->receiver,'replace');
+	$lists[$i]->receiver_photo = $this->IM->getModule('member')->getMemberPhotoUrl($lists[$i]->tomidx);
 	$lists[$i]->subject = GetString($lists[$i]->subject,'replace');
 }
 

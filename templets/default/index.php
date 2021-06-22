@@ -7,8 +7,8 @@
  * @file /modules/email/templets/default/index.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0
- * @modified 2019. 9. 27.
+ * @version 1.0.0
+ * @modified 2021. 6. 22.
  */
 if (defined('__IM__') == false) exit;
 ?>
