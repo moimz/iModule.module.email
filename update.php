@@ -68,14 +68,14 @@ if (version_compare($previousVersion,'3.1.0','<') == true) {
 	$me->db()->alter('email_receiver_table','DROP','parent');
 	$me->db()->alter('email_receiver_table','DROP','message');
 	
+	// 기존의 email_send_table 을 삭제하고, email_receiver_table 을 email_send_table 로 변경한다.
+	$me->db()->drop('email_send_table');
+	$me->db()->rename('email_receiver_table','email_send_table');
+	
 	if ($me->db()->getLastError()) {
 		$me->db()->rollback();
 		return $me->db()->getLastError();
 	}
-	
-	// 기존의 email_send_table 을 삭제하고, email_receiver_table 을 email_send_table 로 변경한다.
-	$me->db()->drop('email_send_table');
-	$me->db()->rename('email_receiver_table','email_send_table');
 	$me->db()->commit();
 }
 
