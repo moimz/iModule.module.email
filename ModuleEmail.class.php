@@ -51,6 +51,8 @@ class ModuleEmail {
 	private $language = null;
 	private $sender = null;
 	private $receiver = null;
+	private $replyTo = null;
+	private $bcc = array();
 	private $subject = null;
 	private $content = null;
 	private $templet = '#';
@@ -363,6 +365,8 @@ class ModuleEmail {
 	function reset() {
 		$this->sender = null;
 		$this->receiver = null;
+		$this->replyTo = null;
+		$this->bcc = array();
 		$this->subject = null;
 		$this->content = null;
 		$this->templet = '#';
@@ -426,6 +430,39 @@ class ModuleEmail {
 		$this->receiver->midx = $midx ? $midx : $this->IM->getModule('member')->getLogged();
 		$this->receiver->email = $email ? $email : $this->IM->getModule('member')->getMember($this->receiver->midx)->email;
 		$this->receiver->name = $name ? $name : $this->IM->getModule('member')->getMember($this->receiver->midx)->nickname;
+		
+		return $this;
+	}
+	
+	/**
+	 * 답장받는사람 정보를 입력한다.
+	 *
+	 * @param string $email 답장을 받을 이메일주소
+	 * @param string $name 답장을 받을 사람이름
+	 * @return ModuleEmail $this
+	 */
+	function setReplyTo($midx=null,$email=null,$name=null) {
+		$this->replyTo = new stdClass();
+		$this->replyTo->midx = $midx ? $midx : $this->IM->getModule('member')->getLogged();
+		$this->replyTo->email = $email ? $email : $this->IM->getModule('member')->getMember($this->receiver->midx)->email;;
+		$this->replyTo->name = $name ? $name : $this->IM->getModule('member')->getMember($this->receiver->midx)->nickname;;
+		
+		return $this;
+	}
+	
+	/**
+	 * 숨은참조 대상을 추가한다.
+	 *
+	 * @param string $email 참조대상 이메일주소
+	 * @param string $name 참조대상 이름
+	 * @return ModuleEmail $this
+	 */
+	public function addBcc($email,$name='') {
+		$bcc = new stdClass();
+		$bcc->email = $email;
+		$bcc->name = $name;
+		
+		$this->bcc[] = $bcc;
 		
 		return $this;
 	}
@@ -592,6 +629,24 @@ class ModuleEmail {
 		$insert['is_push'] = $this->is_push == true ? 'TRUE' : 'FALSE';
 		$insert['reg_date'] = time();
 		$insert['status'] = 'WAIT';
+		
+		/**
+		 * 답장을 받을 사람이 존재하는 경우, 해당 사용자를 발송자로 지정한다.
+		 */
+		if ($this->replyTo != null) {
+			$insert['frommidx'] = $this->replyTo->midx ? $this->replyTo->midx : 0;
+			$insert['sender'] = $this->replyTo->name ? $this->replyTo->name.' <'.$this->replyTo->email.'>' : $this->replyTo->email;
+			$PHPMailer->addReplyTo($this->replyTo->email,($this->replyTo->name ? '=?UTF-8?b?'.base64_encode($this->replyTo->name).'?=' : ''));
+		}
+		
+		/**
+		 * 숨은참조가 있는 경우 추가한다.
+		 */
+		if (count($this->bcc) > 0) {
+			foreach ($this->bcc as $bcc) {
+				$PHPMailer->addBcc($bcc->email,($bcc->name ? '=?UTF-8?b?'.base64_encode($bcc->name).'?=' : ''));
+			}
+		}
 		
 		$idx = $this->db()->insert($this->table->send,$insert)->execute();
 		
