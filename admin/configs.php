@@ -137,7 +137,7 @@ var config = new Ext.form.Panel({
 										name:"email",
 										allowBlank:false,
 										anchor:"100%",
-										emptyText:Email.getText("admin/list/columns/to")
+										emptyText:Email.getText("admin/list/columns/receiver")
 									})
 								]
 							})
