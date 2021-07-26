@@ -20,8 +20,8 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 		tabPosition:"bottom",
 		items:[
 			new Ext.grid.Panel({
-				id:"ModuleEmailSendList",
-				iconCls:"fa fa-bars",
+				id:"ModuleEmailList",
+				iconCls:"xi xi-postbox",
 				title:Email.getText("admin/list/title"),
 				border:false,
 				tbar:[
@@ -33,31 +33,31 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 						handler:function(button) {
 							if (button.pressed === true) {
 								button.setIconCls("fa fa fa-check-square-o");
-								Ext.getCmp("ModuleEmailSendListStartDate").disable();
-								Ext.getCmp("ModuleEmailSendListEndDate").disable();
-								Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("start_date","");
-								Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("end_date","");
-								Ext.getCmp("ModuleEmailSendList").getStore().loadPage(1);
+								Ext.getCmp("ModuleEmailListStartDate").disable();
+								Ext.getCmp("ModuleEmailListEndDate").disable();
+								Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("start_date","");
+								Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("end_date","");
+								Ext.getCmp("ModuleEmailList").getStore().loadPage(1);
 							} else {
 								button.setIconCls("fa fa fa-square-o");
-								Ext.getCmp("ModuleEmailSendListStartDate").enable();
-								Ext.getCmp("ModuleEmailSendListEndDate").enable();
-								Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("start_date",moment(Ext.getCmp("ModuleEmailSendListStartDate").getValue()).format("YYYY-MM-DD"));
-								Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("end_date",moment(Ext.getCmp("ModuleEmailSendListEndDate").getValue()).format("YYYY-MM-DD"));
-								Ext.getCmp("ModuleEmailSendList").getStore().loadPage(1);
+								Ext.getCmp("ModuleEmailListStartDate").enable();
+								Ext.getCmp("ModuleEmailListEndDate").enable();
+								Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("start_date",moment(Ext.getCmp("ModuleEmailListStartDate").getValue()).format("YYYY-MM-DD"));
+								Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("end_date",moment(Ext.getCmp("ModuleEmailListEndDate").getValue()).format("YYYY-MM-DD"));
+								Ext.getCmp("ModuleEmailList").getStore().loadPage(1);
 							}
 						}
 					}),
 					new Ext.form.DateField({
-						id:"ModuleEmailSendListStartDate",
+						id:"ModuleEmailListStartDate",
 						width:120,
 						value:moment().format("YYYY-MM-01"),
 						format:"Y-m-d",
 						disabled:true,
 						listeners:{
 							change:function(form,value) {
-								Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("start_date",moment(value).format("YYYY-MM-DD"));
-								Ext.getCmp("ModuleEmailSendList").getStore().loadPage(1);
+								Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("start_date",moment(value).format("YYYY-MM-DD"));
+								Ext.getCmp("ModuleEmailList").getStore().loadPage(1);
 							}
 						}
 					}),
@@ -65,21 +65,21 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 						value:"~"
 					}),
 					new Ext.form.DateField({
-						id:"ModuleEmailSendListEndDate",
+						id:"ModuleEmailListEndDate",
 						width:120,
 						value:moment().add(1,"month").date(0).format("YYYY-MM-DD"),
 						format:"Y-m-d",
 						disabled:true,
 						listeners:{
 							change:function(form,value) {
-								Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("end_date",moment(value).format("YYYY-MM-DD"));
-								Ext.getCmp("ModuleEmailSendList").getStore().loadPage(1);
+								Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("end_date",moment(value).format("YYYY-MM-DD"));
+								Ext.getCmp("ModuleEmailList").getStore().loadPage(1);
 							}
 						}
 					}),
 					"-",
 					new Ext.form.ComboBox({
-						id:"ModuleEmailSendListKeycode",
+						id:"ModuleEmailListKeycode",
 						store:new Ext.data.ArrayStore({
 							fields:["display","value"],
 							data:(function() {
@@ -96,19 +96,12 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 						valueField:"value",
 						value:"subject"
 					}),
-					Admin.searchField("ModuleEmailSendListKeyword",180,Email.getText("admin/list/keyword"),function(keyword) {
-						Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("keycode",Ext.getCmp("ModuleEmailSendListKeycode").getValue());
-						Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("keyword",Ext.getCmp("ModuleEmailSendListKeyword").getValue());
-						Ext.getCmp("ModuleEmailSendList").getStore().loadPage(1);
+					Admin.searchField("ModuleEmailListKeyword",180,Email.getText("admin/list/keyword"),function(keyword) {
+						Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("keycode",Ext.getCmp("ModuleEmailListKeycode").getValue());
+						Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("keyword",Ext.getCmp("ModuleEmailListKeyword").getValue());
+						Ext.getCmp("ModuleEmailList").getStore().loadPage(1);
 					}),
 					"-",
-					new Ext.Button({
-						text:Email.getText("admin/list/write"),
-						iconCls:"mi mi-plus",
-						handler:function() {
-							Email.write();
-						}
-					}),
 					new Ext.Button({
 						text:Email.getText("admin/list/delete"),
 						iconCls:"mi mi-trash",
@@ -119,32 +112,27 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 					"->",
 					new Ext.button.Segmented({
 						allowMultiple:false,
-						items:[
-							new Ext.Button({
-								text:"전체",
-								is_push:"",
-								pressed:true,
-								iconCls:"fa fa-check-square-o"
-							}),
-							new Ext.Button({
-								text:"알림발송",
-								is_push:"TRUE",
-								iconCls:"fa fa-square-o"
-							}),
-							new Ext.Button({
-								text:"직접발송",
-								is_push:"FALSE",
-								iconCls:"fa fa-square-o"
-							})
-						],
+						items:(function() {
+							var items = [];
+							for (var type in Email.getText("admin/list/type")) {
+								items.push(new Ext.Button({
+									text:Email.getText("admin/list/type/" + type),
+									type:type,
+									pressed:type == "all",
+									iconCls:type == "all" ? "fa fa-check-square-o" : "fa fa-square-o"
+								}));
+							}
+							
+							return items;
+						})(),
 						listeners:{
 							toggle:function(segmented,button,pressed) {
 								for (var i=0, loop=segmented.items.items.length;i<loop;i++) {
 									segmented.items.items[i].setIconCls("fa fa-square-o");
 								}
 								
-								Ext.getCmp("ModuleEmailSendList").getStore().getProxy().setExtraParam("is_push",button.is_push);
-								Ext.getCmp("ModuleEmailSendList").getStore().loadPage(1);
+								Ext.getCmp("ModuleEmailList").getStore().getProxy().setExtraParam("type",button.type);
+								Ext.getCmp("ModuleEmailList").getStore().loadPage(1);
 								button.setIconCls("fa fa-check-square-o");
 							}
 						}
@@ -161,7 +149,7 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 					sorters:[{property:"reg_date",direction:"DESC"}],
 					autoLoad:true,
 					pageSize:50,
-					fields:["idx","sender","sender_photo","receiver","receiver_photo","subject","reg_date","status"],
+					fields:["idx","sender","sender_photo","receiver","receiver_photo","subject",{name:"reg_date",type:"int"},{name:"readed",type:"int"},"status",{name:"is_push",type:"boolean"}],
 					listeners:{
 						load:function(store,records,success,e) {
 							if (success == false) {
@@ -198,7 +186,7 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 					dataIndex:"subject",
 					renderer:function(value,p,record) {
 						var sHTML = "";
-						if (record.data.is_push == "TRUE") sHTML+= '<i class="icon fa fa-bell-o"></i>';
+						if (record.data.is_push == true) sHTML+= '<i class="icon fa fa-bell-o"></i>';
 						sHTML+= value;
 						return sHTML;
 					}
@@ -243,7 +231,7 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 					],
 					listeners:{
 						beforerender:function(tool) {
-							tool.bindStore(Ext.getCmp("ModuleEmailSendList").getStore());
+							tool.bindStore(Ext.getCmp("ModuleEmailList").getStore());
 						}
 					}
 				}),
@@ -254,11 +242,11 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 					itemcontextmenu:function(grid,record,item,index,e) {
 						var menu = new Ext.menu.Menu();
 						
-						menu.addTitle(record.data.receiver_name+"("+record.data.receiver+")");
+						menu.addTitle(record.data.subject);
 						
 						menu.add({
 							iconCls:"xi xi-form",
-							text:"전송기록보기",
+							text:Email.getText("admin/list/menu/view"),
 							handler:function() {
 								Email.list.view(record.data);
 							}
@@ -266,7 +254,7 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 						
 						menu.add({
 							iconCls:"mi mi-trash",
-							text:"전송기록삭제",
+							text:Email.getText("admin/list/menu/delete"),
 							handler:function() {
 								Email.list.delete();
 							}
@@ -276,7 +264,72 @@ Ext.onReady(function () { Ext.getCmp("iModuleAdminPanel").add(
 						menu.showAt(e.getXY());
 					}
 				}
-			})
+			})<?php if ($_SERVER['REMOTE_ADDR'] == '125.141.76.101') { ?>,
+			new Ext.Panel({
+				id:"ModuleEmailSend",
+				iconCls:"xi xi-postcard",
+				title:Email.getText("admin/send/title"),
+				border:false,
+				layout:{type:"hbox",align:"stretch"},
+				padding:5,
+				items:[
+					new Ext.grid.Panel({
+						id:"ModuleEmailSendSearch",
+						title:Email.getText("admin/send/search"),
+						width:360,
+						tbar:[
+							
+						],
+						store:new Ext.data.JsonStore({
+							proxy:{
+								type:"ajax",
+								simpleSortMode:true,
+								url:ENV.getProcessUrl("email","@getSends"),
+								reader:{type:"json"}
+							},
+							remoteSort:true,
+							sorters:[{property:"reg_date",direction:"DESC"}],
+							autoLoad:true,
+							pageSize:50,
+							fields:["idx","sender","sender_photo","receiver","receiver_photo","subject",{name:"reg_date",type:"int"},{name:"readed",type:"int"},"status",{name:"is_push",type:"boolean"}],
+							listeners:{
+								load:function(store,records,success,e) {
+									if (success == false) {
+										if (e.getError()) {
+											Ext.Msg.show({title:Admin.getText("alert/error"),msg:e.getError(),buttons:Ext.Msg.OK,icon:Ext.Msg.ERROR});
+										} else {
+											Ext.Msg.show({title:Admin.getText("alert/error"),msg:Admin.getErrorText("DATA_LOAD_FAILED"),buttons:Ext.Msg.OK,icon:Ext.Msg.ERROR});
+										}
+									}
+								}
+							}
+						}),
+						columns:[{
+							text:Email.getText("admin/send/columns/sender"),
+							width:200,
+							sortable:true,
+							dataIndex:"sender",
+							renderer:function(value,p,record) {
+								return '<i style="width:24px; height:24px; float:left; display:block; background:url('+record.data.sender_photo+'); background-size:cover; background-repeat:no-repeat; border:1px solid #ccc; border-radius:50%; margin:-3px 5px -3px -5px;"></i>' + value;
+							}
+						}],
+						selModel:new Ext.selection.CheckboxModel(),
+						bbar:new Ext.PagingToolbar({
+							id:"test",
+							store:null,
+							displayInfo:false,
+							type:"simple",
+							listeners:{
+								beforerender:function(tool) {
+									tool.bindStore(Ext.getCmp("ModuleEmailSendSearch").getStore());
+//									tool.items.getAt(9).hide();
+//									tool.items.getAt(10).hide();
+								}
+							}
+						})
+					})
+				]
+			})<?php } ?>
 		]
 	})
 ); });

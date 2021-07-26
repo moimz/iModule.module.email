@@ -38,6 +38,7 @@
 			"title":"이메일발송기록",
 			"write":"이메일발송",
 			"delete":"선택기록삭제",
+			"delete_confirm":"선택된 이메일 발송기록을 삭제하시겠습니까?",
 			"keyword":"검색어",
 			"all_period":"전체기간",
 			"keycodes":{
@@ -46,6 +47,11 @@
 				"subject":"제목",
 				"message":"내용"
 			},
+			"type":{
+				"all":"전체",
+				"push":"알림발송",
+				"direct":"직접발송"
+			},
 			"columns":{
 				"sender":"발송자",
 				"receiver":"수신자",
@@ -53,7 +59,14 @@
 				"reg_date":"발송일자",
 				"readed":"확인일자",
 				"status":"전송결과"
+			},
+			"menu":{
+				"view":"발송내용보기",
+				"delete":"선택기록삭제"
 			}
+		},
+		"send":{
+			"title":"이메일발송"
 		}
 	}
 }
