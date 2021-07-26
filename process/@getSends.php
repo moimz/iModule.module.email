@@ -22,23 +22,23 @@ $end_date = Request('end_date') ? strtotime(Request('end_date')) : time();
 $mMember = $this->IM->getModule('member');
 $keycode = Request('keycode');
 $keyword = Request('keyword');
-$is_push = Request('is_push');
+$type = Request('type') ? Request('type') : 'all';
 
-$lists = $this->db()->select($this->table->send,'idx, frommidx, tomidx, sender, receiver, subject, reg_date, readed, status')->where('reg_date',$start_date,'>=')->where('reg_date',$end_date,'<');
-if ($is_push) $lists->where('is_push',$is_push);
+$lists = $this->db()->select($this->table->send,'idx, frommidx, tomidx, sender, receiver, subject, reg_date, readed, status, is_push')->where('reg_date',$start_date,'>=')->where('reg_date',$end_date,'<');
+if ($type != 'all') $lists->where('is_push',$type == 'push' ? 'TRUE' : 'FALSE');
 if ($keyword) {
 	if ($keycode == 'sender') $lists->where('sender','%'.$keyword.'%','LIKE');
-	if ($keycode == 'receiver') $lists->where('s.receiver','%'.$keyword.'%','LIKE');
-	if ($keycode == 'subject') $lists->where('s.subject','%'.$keyword.'%','LIKE');
+	if ($keycode == 'receiver') $lists->where('receiver','%'.$keyword.'%','LIKE');
+	if ($keycode == 'subject') $lists->where('subject','%'.$keyword.'%','LIKE');
 	if ($keycode == 'content') $this->IM->getModule('keyword')->getWhere($lists,array('subject','search'),$keyword);
 }
 
 $total = $lists->copy()->count();
 if ($limit > 0) $lists->limit($start,$limit);
-if ($sort == 'send_date') {
+if ($sort == 'reg_date') {
 	$lists->orderBy('reg_date',$dir);
-} elseif ($sort == 'receive_date') {
-	$lists->orderBy('receive_date',$dir);
+} elseif ($sort == 'readed') {
+	$lists->orderBy('readed',$dir);
 } else {
 	$lists->orderBy($sort,$dir);
 }
@@ -49,6 +49,7 @@ for ($i=0, $loop=count($lists);$i<$loop;$i++) {
 	$lists[$i]->receiver = GetString($lists[$i]->receiver,'replace');
 	$lists[$i]->receiver_photo = $this->IM->getModule('member')->getMemberPhotoUrl($lists[$i]->tomidx);
 	$lists[$i]->subject = GetString($lists[$i]->subject,'replace');
+	$lists[$i]->is_push = $lists[$i]->is_push == 'TRUE';
 }
 
 $results->success = true;
