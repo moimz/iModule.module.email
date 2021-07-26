@@ -66,5 +66,8 @@ $PHPMailer->Body = $this->getTemplet($templet)->getContext('index',$body);
 
 $result = $PHPMailer->send();
 
-$results->success = $result;
+$results->success = $result === true;
+if ($result !== true) {
+	$results->message = $result;
+}
 ?>
