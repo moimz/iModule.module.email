@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2021. 6. 22.
+ * @modified 2021. 7. 26.
  */
 if (defined('__IM__') == false) exit;
 
@@ -44,6 +44,8 @@ if ($use_sendmail === false) {
 	$PHPMailer->IsSMTP();
 	if (Request('smtp_type') != 'NONE') {
 		$PHPMailer->SMTPSecure = strtolower(Request('smtp_type'));
+	} else {
+		$PHPMailer->SMTPAutoTLS = false;
 	}
 	$PHPMailer->Host = Request('smtp_server');
 	$PHPMailer->Port = Request('smtp_port');
