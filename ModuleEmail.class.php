@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.1.0
- * @modified 2021. 6. 22.
+ * @modified 2021. 7. 26.
  */
 class ModuleEmail {
 	/**
@@ -602,6 +602,8 @@ class ModuleEmail {
 			$PHPMailer->IsSMTP();
 			if ($this->getModule()->getConfig('smtp_type') != 'NONE') {
 				$PHPMailer->SMTPSecure = strtolower($this->getModule()->getConfig('smtp_type'));
+			} else {
+				$PHPMailer->SMTPAutoTLS = false;
 			}
 			$PHPMailer->Host = $this->getModule()->getConfig('smtp_server');
 			$PHPMailer->Port = $this->getModule()->getConfig('smtp_port');
